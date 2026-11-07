@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Custom Banners &amp; Vinyl Stickers — Priced by the Square Foot</title>
+<meta name="description" content="Enter width and height in feet, pick a material, see the exact price instantly.">
+<style>
+:root{
+  --bg:#FAF9F6; --surface:#FFFFFF; --ink:#111827; --ink-2:#4B5563; --ink-3:#6B7280;
+  --line:#E5E7EB; --line-2:#D1D5DB; --accent:#047857; --accent-ink:#065F46; --accent-soft:#ECFDF5;
+  --warn:#B45309; --warn-soft:#FFFBEB; --bad:#B91C1C; --bad-soft:#FEF2F2;
+  --radius:8px; --max:1120px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.num,output,.mono{font-variant-numeric:tabular-nums}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+[hidden]{display:none!important}
+
+/* header */
+.topbar{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.topbar .wrap{display:flex;align-items:center;gap:16px;min-height:60px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em}
+.brand i{width:22px;height:22px;border:2px solid var(--ink);display:inline-block;position:relative}
+.brand i::after{content:"";position:absolute;inset:3px;background:var(--accent)}
+.tabs{display:flex;gap:2px;margin-left:12px;flex:1;flex-wrap:wrap}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:8px 12px;cursor:pointer;color:var(--ink-2);font-weight:500}
+.tab[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.tab .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:6px;border-radius:10px;background:var(--ink);color:#fff;font-size:12px;line-height:20px;text-align:center}
+.tab .badge[data-n="0"]{background:var(--line-2)}
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:var(--radius);padding:9px 14px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-ink);border-color:var(--accent-ink)}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.danger{color:var(--bad)}
+.btn.small{padding:5px 10px;font-size:14px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* hero */
+.hero{border-bottom:1px solid var(--line);background:var(--surface)}
+.hero .wrap{padding-top:28px;padding-bottom:28px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center}
+.hero h1{margin:0 0 6px;font-size:clamp(26px,4vw,38px);line-height:1.15;letter-spacing:-.02em}
+.hero p{margin:0;color:var(--ink-2);max-width:60ch}
+.hero .cta{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:250px}
+.hero .cta small{color:var(--ink-3);text-align:center}
+.btn.big{padding:14px 20px;font-size:17px}
+
+main{padding:28px 0 64px}
+.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:24px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+.card>h2,.card-h{margin:0;padding:14px 18px;border-bottom:1px solid var(--line);font-size:15px;font-weight:700;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.card-b{padding:18px}
+.muted{color:var(--ink-3)}
+.sm{font-size:14px}
+
+/* preview */
+.stage{height:300px;border-bottom:1px solid var(--line);background:#F3F4F6;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:34px 40px 48px 34px}
+.sheet{position:relative;background:#fff;border:1px solid var(--ink);display:flex;align-items:center;justify-content:center;text-align:center;color:var(--ink);transition:width .18s,height .18s;box-shadow:3px 3px 0 var(--line-2)}
+.sheet .sheet-name{font-weight:700;padding:4px 8px;line-height:1.2;font-size:clamp(11px,1.6vw,15px)}
+.sheet.sticker{border-radius:14px}
+.dim{position:absolute;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap}
+.dim-w{left:0;right:0;top:-24px;text-align:center}
+.dim-w::before,.dim-h::before{content:"";position:absolute;background:var(--ink-3)}
+.dim-w::before{left:0;right:0;top:100%;height:1px;margin-top:2px}
+.dim-h{top:50%;right:-12px;transform:translate(100%,-50%)}
+.dim-h::before{display:none}
+.hline{position:absolute;top:0;bottom:0;right:-10px;width:1px;background:var(--ink-3)}
+.stage-note{position:absolute;left:12px;bottom:8px;font-size:12px;color:var(--ink-3)}
+.facts{display:grid;grid-template-columns:repeat(3,1fr)}
+.facts div{padding:14px 18px;border-right:1px solid var(--line)}
+.facts div:last-child{border-right:0}
+.facts b{display:block;font-size:20px}
+.facts span{font-size:13px;color:var(--ink-3)}
+
+/* form */
+.field{margin-bottom:16px}
+.field label,.lbl{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.inp{width:100%;border:1px solid var(--line-2);background:#fff;border-radius:var(--radius);padding:10px 12px;min-height:44px}
+.inp:focus{border-color:var(--accent)}
+.inp[aria-invalid="true"]{border-color:var(--bad);background:var(--bad-soft)}
+.unit{position:relative}
+.unit .inp{padding-right:42px;font-size:18px}
+.unit span{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--ink-3);pointer-events:none}
+select.inp{appearance:none;padding-right:36px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23111827' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 14px center}
+.err{color:var(--bad);font-size:13px;min-height:18px;margin-top:4px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip-btn{border:1px solid var(--line-2);background:#fff;border-radius:999px;padding:3px 10px;font-size:13px;cursor:pointer}
+.chip-btn:hover{border-color:var(--ink)}
+
+.formula{border:1px solid var(--line);border-radius:var(--radius);background:var(--bg);padding:14px}
+.formula .eq{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:flex-start}
+.formula .t{text-align:center}
+.formula .t b{display:block;padding:5px 9px;border:1px solid var(--line-2);background:#fff;border-radius:6px;font-size:16px}
+.formula .t.res b{background:var(--ink);color:#fff;border-color:var(--ink)}
+.formula .t small{display:block;font-size:11px;color:var(--ink-3);margin-top:3px;text-transform:uppercase;letter-spacing:.04em}
+.formula .op{padding-top:5px;color:var(--ink-3);font-size:18px}
+.formula .legend{margin-top:10px;font-size:12px;color:var(--ink-3)}
+.total{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:18px 0 14px}
+.total .big{font-size:clamp(34px,6vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1}
+.total .sub{font-size:13px;color:var(--ink-3)}
+.qty{display:flex;align-items:center;gap:0}
+.qty button{width:44px;height:44px;border:1px solid var(--line-2);background:#fff;cursor:pointer;font-size:18px}
+.qty button:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+.qty button:last-child{border-radius:0 var(--radius) var(--radius) 0}
+.qty input{width:64px;height:44px;text-align:center;border:1px solid var(--line-2);border-left:0;border-right:0;border-radius:0}
+
+dl.sum{margin:0 0 14px;font-size:14px}
+dl.sum div{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line)}
+dl.sum dt{color:var(--ink-2)} dl.sum dd{margin:0;font-weight:600}
+
+/* test result */
+.selftest{border:1px solid var(--accent);background:var(--accent-soft);border-radius:var(--radius);padding:14px 16px;margin-bottom:20px}
+.selftest h3{margin:0 0 8px;font-size:15px}
+.selftest ul{list-style:none;margin:0;padding:0;font-size:14px}
+.selftest li{display:flex;gap:8px;padding:2px 0}
+.selftest .ok{color:var(--accent);font-weight:700}
+.selftest .no{color:var(--bad);font-weight:700}
+.selftest.fail{border-color:var(--bad);background:var(--bad-soft)}
+
+/* steps */
+.steps{display:flex;gap:0;margin:0 0 22px;padding:0;list-style:none;font-size:14px;flex-wrap:wrap}
+.steps li{padding:6px 14px 6px 0;color:var(--ink-3);display:flex;align-items:center;gap:8px}
+.steps li::after{content:"";width:28px;height:1px;background:var(--line-2)}
+.steps li:last-child::after{display:none}
+.steps b{width:22px;height:22px;border-radius:50%;border:1px solid var(--line-2);display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.steps li.on{color:var(--ink);font-weight:600}
+.steps li.on b{background:var(--accent);border-color:var(--accent);color:#fff}
+.steps li.done b{background:var(--ink);border-color:var(--ink);color:#fff}
+
+/* cart */
+.line{display:grid;grid-template-columns:76px 1fr auto;gap:14px;padding:16px 18px;border-bottom:1px solid var(--line);align-items:start}
+.line:last-child{border-bottom:0}
+.line .thumb{width:76px;height:62px;background:#F3F4F6;display:flex;align-items:center;justify-content:center;border:1px solid var(--line)}
+.line .thumb i{display:block;background:#fff;border:1px solid var(--ink)}
+.line h4{margin:0 0 2px;font-size:15px}
+.line p{margin:0;font-size:13px;color:var(--ink-2)}
+.line .price{text-align:right;font-weight:700}
+.line .acts{display:flex;gap:8px;margin-top:8px;align-items:center}
+.line .acts input{width:60px;min-height:34px;padding:4px 8px;text-align:center}
+.empty{padding:40px 18px;text-align:center;color:var(--ink-3)}
+pre.code{margin:0;background:var(--ink);color:#E5E7EB;border-radius:var(--radius);padding:14px;overflow:auto;font-size:12.5px;line-height:1.55;max-height:340px}
+table.kv{width:100%;border-collapse:collapse;font-size:13px}
+table.kv th,table.kv td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.kv th{color:var(--ink-3);font-weight:600;width:44%}
+table.kv td{word-break:break-all}
+.conf{text-align:center;padding:30px 18px}
+.conf .tick{width:54px;height:54px;border-radius:50%;background:var(--accent);color:#fff;font-size:28px;display:inline-flex;align-items:center;justify-content:center}
+
+/* admin */
+.notice{border:1px solid var(--line-2);background:var(--warn-soft);border-left:3px solid var(--warn);padding:10px 14px;border-radius:var(--radius);font-size:14px;margin-bottom:18px}
+table.mat{width:100%;border-collapse:collapse}
+table.mat th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3);text-align:left;padding:0 8px 8px}
+table.mat td{padding:4px 8px 4px 0}
+table.mat td:last-child{width:1%;white-space:nowrap}
+.rate{position:relative}
+.rate b{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-weight:400}
+.rate .inp{padding-left:22px}
+textarea.inp{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;min-height:160px;resize:vertical}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:var(--radius);font-size:14px;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+footer{border-top:1px solid var(--line);padding:20px 0;color:var(--ink-3);font-size:13px;background:var(--surface)}
+
+@media (max-width:860px){
+  .grid{grid-template-columns:minmax(0,1fr)}
+  .hero .wrap{grid-template-columns:minmax(0,1fr)}
+  .hero .cta{min-width:0}
+  .tabs{order:3;flex-basis:100%;margin-left:0}
+  .topbar .btn.top-test{margin-left:auto}
+}
+@media (max-width:520px){
+  .topbar .btn.top-test{padding:8px 10px;font-size:14px}
+  .brand span{font-size:14px}
+  .wrap{padding:0 14px}
+  .stage{height:240px;padding:30px 36px 46px 28px}
+  .line{grid-template-columns:56px 1fr}
+  .line .thumb{width:56px;height:48px}
+  .line .price{grid-column:2;text-align:left}
+  .facts b{font-size:17px}
+  table.mat th:nth-child(3){display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<!--
+  RATE CONFIG (edit here, or use the Admin Panel tab, then Export JSON and paste it back here).
+  baseFee  = one-time setup fee added to every line.
+  checkout.mode: "demo" (built-in cart) | "form" (POST hidden fields to checkout.action) | "ajax" (POST JSON to checkout.action)
+  ui.admin: set false on the public page to hide the Admin Panel tab.
+  configUrl: optional, e.g. "rates.json" — loaded at page start (overridden by a browser-local Admin edit).
+-->
+<script type="application/json" id="sqft-config">
+{
+  "currency": "$",
+  "baseFee": 15,
+  "limits": { "min": 0.5, "max": 100 },
+  "materials": [
+    { "id": "banner-13oz",  "name": "13 oz Matte Vinyl Banner",        "rate": 3.5,  "kind": "banner" },
+    { "id": "banner-18oz",  "name": "18 oz Heavy-Duty Vinyl Banner",   "rate": 4.75, "kind": "banner" },
+    { "id": "banner-mesh",  "name": "9 oz Mesh Banner (wind-through)", "rate": 4.25, "kind": "banner" },
+    { "id": "sticker-gloss","name": "Gloss Vinyl Sticker",             "rate": 6,    "kind": "sticker" },
+    { "id": "sticker-matte","name": "Removable Matte Vinyl Sticker",   "rate": 6.5,  "kind": "sticker" },
+    { "id": "sticker-refl", "name": "Reflective Vinyl Sticker",        "rate": 9.25, "kind": "sticker" }
+  ],
+  "checkout": { "mode": "demo", "action": "", "redirect": "" },
+  "ui": { "admin": true },
+  "configUrl": ""
+}
+</script>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand"><i aria-hidden="true"></i><span>Northline Print &amp; Signage</span></div>
+    <nav class="tabs" aria-label="Sections">
+      <button class="tab" data-view="shop" type="button">Product</button>
+      <button class="tab" data-view="cart" type="button">Cart &amp; Checkout <span class="badge num" id="cartBadge" data-n="0">0</span></button>
+      <button class="tab" data-view="admin" type="button" id="adminTab">Admin Panel</button><a href="index.html" style="font-size:13px;font-weight:600;color:#111827;text-decoration:none;border:1px solid #e5e7eb;border-radius:6px;padding:7px 12px;margin-left:8px;background:#f9fafb">← Layout A: Blueprint View</a>
+    </nav>
+    <button class="btn primary top-test" type="button" data-run-test>▶ Run 4 × 6 ft Banner Test</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Custom banners &amp; vinyl stickers,<br>priced by the square foot.</h1>
+      <p>Type your width and height in feet. The area, rate and final price update as you type. Change the material and the rate changes with it. Nothing else does.</p>
+    </div>
+    <div class="cta">
+      <button class="btn primary big" type="button" data-run-test>▶ Run 4 × 6 ft Banner Test</button>
+      <small>Fills 4 × 6 ft, checks the math, sends it to checkout.</small>
+    </div>
+  </div>
+</section>
+
+<main>
+<div class="wrap">
+
+<!-- ================= PRODUCT VIEW ================= -->
+<section id="view-shop" data-panel="shop">
+  <div class="grid">
+    <div class="card" aria-label="Size preview">
+      <h2>Size preview <span class="muted sm num" id="pvLabel">4 ft × 6 ft</span></h2>
+      <div class="stage" id="stage">
+        <div class="sheet" id="sheet" role="img" aria-label="Proportional preview of the banner size">
+          <span class="sheet-name" id="sheetName"></span>
+          <span class="dim dim-w num" id="dimW"></span>
+          <span class="hline" aria-hidden="true"></span>
+          <span class="dim dim-h num" id="dimH"></span>
+        </div>
+        <span class="stage-note">Drawn to scale with the same width-to-height ratio. Grid squares = 1 ft.</span>
+      </div>
+      <div class="facts">
+        <div><b class="num" id="factArea">—</b><span>Total sq ft</span></div>
+        <div><b class="num" id="factRate">—</b><span>Rate / sq ft</span></div>
+        <div><b class="num" id="factFee">—</b><span>Base setup fee</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Configure &amp; price</h2>
+      <div class="card-b">
+        <div class="row2">
+          <div class="field">
+            <label for="w">Width</label>
+            <div class="unit"><input class="inp num" id="w" type="number" inputmode="decimal" step="any" min="0" value="4" autocomplete="off"><span>ft</span></div>
+          </div>
+          <div class="field">
+            <label for="h">Height</label>
+            <div class="unit"><input class="inp num" id="h" type="number" inputmode="decimal" step="any" min="0" value="6" autocomplete="off"><span>ft</span></div>
+          </div>
+        </div>
+        <div class="err" id="dimErr" role="alert"></div>
+        <div class="chips" aria-label="Common sizes">
+          <button type="button" class="chip-btn num" data-size="2x4">2 × 4</button>
+          <button type="button" class="chip-btn num" data-size="3x5">3 × 5</button>
+          <button type="button" class="chip-btn num" data-size="4x6">4 × 6</button>
+          <button type="button" class="chip-btn num" data-size="3x10">3 × 10</button>
+          <button type="button" class="chip-btn num" data-size="1x1">1 × 1</button>
+        </div>
+
+        <div class="field" style="margin-top:18px">
+          <label for="mat">Material</label>
+          <select class="inp" id="mat"></select>
+        </div>
+
+        <div class="formula" aria-label="Price formula">
+          <div class="eq" id="eq"></div>
+          <div class="legend">Width × Height = Sq Ft × Rate + Base Setup Fee = Final Price</div>
+        </div>
+
+        <div class="total">
+          <div>
+            <div class="sub">Final price<span id="qtyNote"></span></div>
+            <output class="big num" id="total" for="w h mat qty" aria-live="polite">—</output>
+          </div>
+          <div>
+            <div class="lbl" style="text-align:right">Qty</div>
+            <div class="qty">
+              <button type="button" id="qMinus" aria-label="Decrease quantity">−</button>
+              <input class="inp num" id="qty" type="number" min="1" max="999" step="1" value="1" aria-label="Quantity">
+              <button type="button" id="qPlus" aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn primary big" style="width:100%" type="button" id="addBtn">Add to cart &amp; checkout</button>
+        <p class="muted sm" style="margin:10px 0 0">Price, material, width and height go to checkout together as one line item.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CART VIEW ================= -->
+<section id="view-cart" data-panel="cart" hidden>
+  <ol class="steps" id="steps" aria-label="Order progress">
+    <li class="done"><b>✓</b>Configure</li>
+    <li class="on" data-step="cart"><b>2</b>Cart</li>
+    <li data-step="pay"><b>3</b>Checkout</li>
+    <li data-step="done"><b>4</b>Confirmation</li>
+  </ol>
+  <div id="testResult"></div>
+  <div class="grid">
+    <div>
+      <div class="card" id="cartCard">
+        <h2>Your cart <button class="btn small" type="button" id="backToShop">+ Add another size</button></h2>
+        <div id="cartLines"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card" id="orderCard">
+        <h2>Checkout</h2>
+        <div class="card-b" id="orderBody"></div>
+      </div>
+      <div class="card" style="margin-top:20px" id="payloadCard">
+        <h2>Data sent to checkout <span class="muted sm">per line item</span></h2>
+        <div class="card-b">
+          <p class="muted sm" style="margin:0 0 10px">These fields travel with the item into your cart, order record and invoice.</p>
+          <div id="payloadFields"></div>
+          <details style="margin-top:12px"><summary class="sm" style="cursor:pointer">JSON version</summary><pre class="code" id="payloadJson" style="margin-top:8px"></pre></details>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ADMIN VIEW ================= -->
+<section id="view-admin" data-panel="admin" hidden>
+  <div class="notice"><b>No-Code Admin Panel.</b> Edit names, rates and the setup fee. The product page updates immediately and the values are saved in this browser (<span class="mono">localStorage</span>). To publish the same rates for every visitor, use <b>Export JSON</b> and paste it into the <span class="mono">sqft-config</span> block (see INTEGRATION_GUIDE.md). Items already in a cart keep the price they were added at.</div>
+  <div class="grid">
+    <div class="card">
+      <h2>Materials &amp; rates <button class="btn small primary" type="button" id="addMat">+ Add material</button></h2>
+      <div class="card-b">
+        <table class="mat">
+          <thead><tr><th scope="col">Material name</th><th scope="col">$ / sq ft</th><th scope="col"><span class="sr" style="position:absolute;left:-9999px">Actions</span></th></tr></thead>
+          <tbody id="matRows"></tbody>
+        </table>
+        <div class="err" id="admErr" role="alert"></div>
+        <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+        <div class="field" style="max-width:260px;margin-bottom:0">
+          <label for="feeInp">Base setup fee (added once per line)</label>
+          <div class="rate"><b>$</b><input class="inp num" id="feeInp" type="number" step="0.01" min="0" inputmode="decimal"></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h2>Checkout target</h2>
+        <div class="card-b">
+          <div class="field">
+            <label for="coMode">Where "Add to cart" sends the item</label>
+            <select class="inp" id="coMode">
+              <option value="demo">Built-in demo cart (this page)</option>
+              <option value="form">Your cart — form POST (hidden fields)</option>
+              <option value="ajax">Your cart — AJAX POST (JSON)</option>
+            </select>
+          </div>
+          <div class="field" id="coActionWrap" hidden>
+            <label for="coAction">Cart / checkout URL</label>
+            <input class="inp mono" id="coAction" placeholder="/cart/add or https://shop.example.com/cart.php">
+          </div>
+          <div class="field" id="coRedirectWrap" hidden style="margin-bottom:0">
+            <label for="coRedirect">After AJAX success, go to (optional; a redirect/checkout_url in the reply wins)</label>
+            <input class="inp mono" id="coRedirect" placeholder="/checkout">
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:20px">
+        <h2>Save, export &amp; import</h2>
+        <div class="card-b">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+            <button class="btn small" type="button" id="expDl">Download JSON</button>
+            <button class="btn small" type="button" id="expCopy">Copy JSON</button>
+            <label class="btn small" for="impFile" style="margin:0">Import file…</label>
+            <input type="file" id="impFile" accept="application/json,.json" hidden>
+            <button class="btn small danger" type="button" id="resetCfg">Reset to defaults</button>
+          </div>
+          <label class="lbl" for="jsonBox">Config JSON — edit or paste, then Apply</label>
+          <textarea class="inp" id="jsonBox" spellcheck="false"></textarea>
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="btn small dark" type="button" id="applyJson">Apply JSON</button>
+            <span class="sm" id="jsonMsg" role="status"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+
+<footer><div class="wrap">Prices in USD. Final price = (width × height × material rate) + base setup fee, per piece. Demo checkout: no payment is taken.</div></footer>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- helpers ---------- */
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var LS_CFG = 'sqftpro.config.v1', LS_CART = 'sqftpro.cart.v1';
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  function el(tag, props, kids) {
+    var n = document.createElement(tag);
+    Object.keys(props || {}).forEach(function (k) {
+      if (k === 'text') n.textContent = props[k]; else if (k === 'class') n.className = props[k]; else n.setAttribute(k, props[k]);
+    });
+    (kids || []).forEach(function (c) { n.appendChild(c); });
+    return n;
+  }
+  function slug(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+  function money(cents, cur) {
+    return (cur || '$') + (cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function rateFmt(r, cur) {
+    return (cur || '$') + r.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+  }
+  function numFmt(n) { return String(Math.round(n * 100) / 100); }
+  function toast(msg) {
+    var t = $('#toast'); t.textContent = msg; t.hidden = false;
+    clearTimeout(toast._t); toast._t = setTimeout(function () { t.hidden = true; }, 2600);
+  }
+
+  /* ---------- config ---------- */
+  function normalize(raw) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('Config must be a JSON object.');
+    if (!Array.isArray(raw.materials) || !raw.materials.length) throw new Error('"materials" must be a non-empty list.');
+    var seen = {};
+    var mats = raw.materials.map(function (m, i) {
+      var name = String(m && m.name != null ? m.name : '').trim();
+      var rate = Number(m && m.rate);
+      if (!name) throw new Error('Material #' + (i + 1) + ' needs a name.');
+      if (!isFinite(rate) || rate < 0) throw new Error('Material "' + name + '" needs a rate of 0 or more.');
+      var id = String((m && m.id) || slug(name) || 'm' + i);
+      while (seen[id]) id += '-' + i;
+      seen[id] = 1;
+      return { id: id, name: name, rate: Math.round(rate * 10000) / 10000, kind: m && m.kind === 'sticker' ? 'sticker' : 'banner' };
+    });
+    var fee = raw.baseFee == null || raw.baseFee === '' ? 0 : Number(raw.baseFee);
+    if (!isFinite(fee) || fee < 0) throw new Error('"baseFee" must be 0 or more.');
+    var lim = raw.limits || {};
+    var min = Number(lim.min) > 0 ? Number(lim.min) : 0.5;
+    var max = Number(lim.max) > min ? Number(lim.max) : 100;
+    var co = raw.checkout || {};
+    return {
+      currency: typeof raw.currency === 'string' && raw.currency ? raw.currency : '$',
+      baseFee: Math.round(fee * 100) / 100,
+      limits: { min: min, max: max },
+      materials: mats,
+      checkout: {
+        mode: ['demo', 'form', 'ajax'].indexOf(co.mode) >= 0 ? co.mode : 'demo',
+        action: String(co.action || ''), redirect: String(co.redirect || '')
+      },
+      ui: { admin: !(raw.ui && raw.ui.admin === false) },
+      configUrl: String(raw.configUrl || '')
+    };
+  }
+  var DEFAULTS = normalize(JSON.parse($('#sqft-config').textContent));
+  var cfg;
+  (function () {
+    var s = lsGet(LS_CFG);
+    if (s) { try { cfg = normalize(JSON.parse(s)); } catch (e) { cfg = null; } }
+    if (!cfg) cfg = JSON.parse(JSON.stringify(DEFAULTS));
+    // host page decides whether Admin is visible, even if an old local copy says otherwise
+    cfg.ui.admin = DEFAULTS.ui.admin;
+  })();
+  function saveCfg() { lsSet(LS_CFG, JSON.stringify(cfg)); }
+
+  /* ---------- pricing (integer maths: no float drift) ---------- */
+  function quote(w, h, mat, fee) {
+    var sqft100 = Math.round(w * h * 100);                 // sq ft x 100
+    var rateMicro = Math.round(mat.rate * 10000);          // $ x 10000
+    var areaCents = Math.round(sqft100 * rateMicro / 10000);
+    var feeCents = Math.round(fee * 100);
+    return { sqft: sqft100 / 100, areaCents: areaCents, feeCents: feeCents, unitCents: areaCents + feeCents };
+  }
+
+  /* ---------- state ---------- */
+  var st = { w: '4', h: '6', mat: cfg.materials[0].id, qty: 1 };
+  var cart = [];
+  (function () { var s = lsGet(LS_CART); if (s) { try { cart = JSON.parse(s) || []; } catch (e) { cart = []; } } })();
+  function saveCart() { lsSet(LS_CART, JSON.stringify(cart)); renderBadge(); }
+  var order = null, lastTest = null, step = 'cart';
+
+  function curMat() {
+    for (var i = 0; i < cfg.materials.length; i++) if (cfg.materials[i].id === st.mat) return cfg.materials[i];
+    return cfg.materials[0];
+  }
+  function dims() {
+    var w = parseFloat(st.w), h = parseFloat(st.h), L = cfg.limits, msg = '';
+    if (st.w === '' || st.h === '') msg = 'Enter both width and height in feet.';
+    else if (!isFinite(w) || !isFinite(h) || w <= 0 || h <= 0) msg = 'Width and height must be numbers greater than 0.';
+    else if (w < L.min || h < L.min) msg = 'Minimum size is ' + L.min + ' ft per side.';
+    else if (w > L.max || h > L.max) msg = 'Maximum size is ' + L.max + ' ft per side.';
+    return { ok: !msg, w: w, h: h, msg: msg };
+  }
+
+  /* ---------- render: product ---------- */
+  function renderSelect() {
+    var sel = $('#mat'); sel.textContent = '';
+    cfg.materials.forEach(function (m) {
+      sel.appendChild(el('option', { value: m.id, text: m.name + ' — ' + rateFmt(m.rate, cfg.currency) + ' / sq ft' }));
+    });
+    if (!cfg.materials.some(function (m) { return m.id === st.mat; })) st.mat = cfg.materials[0].id;
+    sel.value = st.mat;
+  }
+  function term(val, cap, cls) { return '<div class="t ' + (cls || '') + '"><b class="num">' + val + '</b><small>' + cap + '</small></div>'; }
+  function op(s) { return '<span class="op" aria-hidden="true">' + s + '</span>'; }
+
+  function renderCalc() {
+    var d = dims(), m = curMat(), cur = cfg.currency, L = cfg.limits;
+    var err = $('#dimErr'); err.textContent = d.ok ? '' : d.msg;
+    var showErr = !d.ok && (st.w !== '' && st.h !== '');
+    err.textContent = showErr ? d.msg : '';
+    $('#w').setAttribute('aria-invalid', String(!d.ok && (st.w === '' || !(parseFloat(st.w) >= L.min && parseFloat(st.w) <= L.max))));
+    $('#h').setAttribute('aria-invalid', String(!d.ok && (st.h === '' || !(parseFloat(st.h) >= L.min && parseFloat(st.h) <= L.max))));
+    $('#factRate').textContent = rateFmt(m.rate, cur);
+    $('#factFee').textContent = money(Math.round(cfg.baseFee * 100), cur);
+    $('#sheetName').textContent = m.name;
+    $('#sheet').classList.toggle('sticker', m.kind === 'sticker');
+    var out = $('#total'), eq = $('#eq');
+    if (!d.ok) {
+      out.textContent = '—'; $('#factArea').textContent = '—'; $('#qtyNote').textContent = '';
+      eq.innerHTML = term('—', 'Width') + op('×') + term('—', 'Height') + op('=') + term('—', 'Sq ft') + op('×') +
+        term(rateFmt(m.rate, cur), 'Rate') + op('+') + term(money(Math.round(cfg.baseFee * 100), cur), 'Setup fee') + op('=') + term('—', 'Price', 'res');
+      $('#addBtn').disabled = true;
+      $('#pvLabel').textContent = 'enter a size';
+      drawPreview(null);
+      return;
+    }
+    var q = quote(d.w, d.h, m, cfg.baseFee), total = q.unitCents * st.qty;
+    out.textContent = money(total, cur);
+    $('#qtyNote').textContent = st.qty > 1 ? ' (' + st.qty + ' × ' + money(q.unitCents, cur) + ')' : '';
+    $('#factArea').textContent = q.sqft.toFixed(2);
+    eq.innerHTML = term(numFmt(d.w) + ' ft', 'Width') + op('×') + term(numFmt(d.h) + ' ft', 'Height') + op('=') +
+      term(q.sqft.toFixed(2) + ' sq ft', 'Sq ft') + op('×') + term(rateFmt(m.rate, cur), 'Rate') + op('+') +
+      term(money(q.feeCents, cur), 'Setup fee') + op('=') + term(money(q.unitCents, cur), 'Price', 'res');
+    $('#addBtn').disabled = false;
+    $('#pvLabel').textContent = numFmt(d.w) + ' ft × ' + numFmt(d.h) + ' ft';
+    drawPreview(d);
+  }
+
+  function drawPreview(d) {
+    var stage = $('#stage'), sheet = $('#sheet');
+    if (!d) { sheet.style.visibility = 'hidden'; return; }
+    sheet.style.visibility = 'visible';
+    var cs = getComputedStyle(stage);
+    var aw = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    var ah = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    var s = Math.min(aw / d.w, ah / d.h);                  // px per foot
+    var pw = Math.max(d.w * s, 28), ph = Math.max(d.h * s, 28);
+    sheet.style.width = pw + 'px'; sheet.style.height = ph + 'px';
+    var grid = s;                                          // 1 ft grid, only if readable
+    sheet.style.backgroundImage = grid >= 8 ?
+      'linear-gradient(to right,#E5E7EB 1px,transparent 1px),linear-gradient(to bottom,#E5E7EB 1px,transparent 1px)' : 'none';
+    sheet.style.backgroundSize = grid + 'px ' + grid + 'px';
+    $('#dimW').textContent = numFmt(d.w) + ' ft';
+    $('#dimH').textContent = numFmt(d.h) + ' ft';
+  }
+
+  /* ---------- cart & payload ---------- */
+  function buildPayload(line) {
+    return {
+      product: 'Custom Banner / Vinyl Sticker (priced per sq ft)',
+      material_id: line.mat.id,
+      material: line.mat.name,
+      rate_per_sqft: line.mat.rate,
+      width_ft: line.w,
+      height_ft: line.h,
+      area_sqft: line.sqft,
+      setup_fee: line.feeCents / 100,
+      unit_price: line.unitCents / 100,
+      quantity: line.qty,
+      line_total: (line.unitCents * line.qty) / 100,
+      currency: 'USD'
+    };
+  }
+  function flat(p) {
+    var o = {}; Object.keys(p).forEach(function (k) { o['sqft_' + k] = p[k]; }); return o;
+  }
+  function makeLine() {
+    var d = dims(); if (!d.ok) return null;
+    var m = curMat(), q = quote(d.w, d.h, m, cfg.baseFee);
+    return {
+      id: 'L' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+      mat: { id: m.id, name: m.name, rate: m.rate, kind: m.kind },
+      w: d.w, h: d.h, sqft: q.sqft, feeCents: q.feeCents, unitCents: q.unitCents, qty: st.qty
+    };
+  }
+  function addToCart(opts) {
+    var line = makeLine(); if (!line) { toast('Enter a valid size first.'); return null; }
+    var payload = buildPayload(line);
+    var ev = new CustomEvent('sqft:add-to-cart', { detail: payload, cancelable: true });
+    var proceed = document.dispatchEvent(ev);
+    var mode = cfg.checkout.mode;
+    if (!proceed) return line;                              // host page handled it
+    if (mode === 'form' && cfg.checkout.action && !(opts && opts.forceDemo)) { postForm(payload); return line; }
+    if (mode === 'ajax' && cfg.checkout.action && !(opts && opts.forceDemo)) { postAjax(payload); return line; }
+    cart.push(line); saveCart();
+    return line;
+  }
+  function postForm(payload) {
+    var f = el('form', { method: 'POST', action: cfg.checkout.action, style: 'display:none' });
+    var fields = flat(payload);
+    Object.keys(fields).forEach(function (k) { f.appendChild(el('input', { type: 'hidden', name: k, value: String(fields[k]) })); });
+    document.body.appendChild(f); f.submit();
+  }
+  function postAjax(payload) {
+    toast('Sending to your cart…');
+    fetch(cfg.checkout.action, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(payload) })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json().catch(function () { return {}; }); })
+      .then(function (j) {
+        var go = (j && (j.redirect || j.checkout_url || j.invoice_url)) || cfg.checkout.redirect;
+        if (go) location.href = go; else toast('Added to your cart.');
+      })
+      .catch(function (e) { toast('Could not reach your cart: ' + e.message); });
+  }
+
+  function renderBadge() {
+    var n = cart.reduce(function (a, l) { return a + l.qty; }, 0), b = $('#cartBadge');
+    b.textContent = n; b.setAttribute('data-n', n);
+  }
+  function lineTotal(l) { return l.unitCents * l.qty; }
+  function cartTotal() { return cart.reduce(function (a, l) { return a + lineTotal(l); }, 0); }
+
+  function renderCart() {
+    var box = $('#cartLines'); box.textContent = '';
+    var cur = cfg.currency;
+    if (order) {
+      box.appendChild(el('div', { class: 'empty', text: 'Order ' + order.number + ' placed. Cart is empty.' }));
+    } else if (!cart.length) {
+      box.appendChild(el('div', { class: 'empty', text: 'Your cart is empty. Add a banner or sticker from the Product tab, or run the 4 × 6 ft test.' }));
+    } else {
+      cart.forEach(function (l, i) {
+        var s = Math.min(60 / l.w, 46 / l.h);
+        var thumb = el('div', { class: 'thumb' }, [el('i', { style: 'width:' + Math.max(l.w * s, 6) + 'px;height:' + Math.max(l.h * s, 6) + 'px;' + (l.mat.kind === 'sticker' ? 'border-radius:5px' : '') })]);
+        var qty = el('input', { class: 'inp num', type: 'number', min: '1', max: '999', value: String(l.qty), 'aria-label': 'Quantity' });
+        qty.addEventListener('change', function () {
+          var v = Math.max(1, Math.min(999, parseInt(qty.value, 10) || 1)); l.qty = v; saveCart(); renderCart();
+        });
+        var rm = el('button', { class: 'btn small danger', type: 'button', text: 'Remove' });
+        rm.addEventListener('click', function () { cart.splice(i, 1); saveCart(); renderCart(); });
+        var info = el('div', {}, [
+          el('h4', { text: l.mat.name }),
+          el('p', { class: 'num', text: numFmt(l.w) + ' ft × ' + numFmt(l.h) + ' ft = ' + l.sqft.toFixed(2) + ' sq ft' }),
+          el('p', { class: 'num', text: l.sqft.toFixed(2) + ' × ' + rateFmt(l.mat.rate, cur) + ' + ' + money(l.feeCents, cur) + ' setup = ' + money(l.unitCents, cur) + ' each' }),
+          el('div', { class: 'acts' }, [qty, rm])
+        ]);
+        box.appendChild(el('div', { class: 'line' }, [thumb, info, el('div', { class: 'price num', text: money(lineTotal(l), cur) })]));
+      });
+    }
+    renderOrder(); renderPayload(); renderSteps();
+  }
+
+  function renderSteps() {
+    var s = order ? 'done' : (cart.length ? 'pay' : 'cart');
+    $$('#steps li').forEach(function (li, i) {
+      li.className = '';
+      var idx = { cart: 1, pay: 2, done: 3 }[s];
+      if (i < idx) li.className = 'done'; else if (i === idx) li.className = 'on';
+      $('b', li).textContent = i < idx ? '✓' : String(i + 1);
+    });
+    $('#steps li:nth-child(2)').className = s === 'cart' ? 'on' : 'done';
+    $('#steps li:nth-child(2) b').textContent = s === 'cart' ? '2' : '✓';
+  }
+
+  function renderOrder() {
+    var b = $('#orderBody'), cur = cfg.currency; b.textContent = '';
+    if (order) {
+      var c = el('div', { class: 'conf' }, [
+        el('div', { class: 'tick', text: '✓' }),
+        el('h3', { text: 'Test order placed', style: 'margin:14px 0 4px' }),
+        el('p', { class: 'num', text: 'Order ' + order.number, style: 'margin:0;font-weight:700' }),
+        el('p', { class: 'muted sm', text: 'No payment was taken. The order below is what your store receives.' })
+      ]);
+      b.appendChild(c);
+      b.appendChild(el('pre', { class: 'code mono', text: JSON.stringify(order, null, 2) }));
+      var nb = el('button', { class: 'btn', type: 'button', text: 'Start a new order', style: 'margin-top:12px;width:100%' });
+      nb.addEventListener('click', function () { order = null; show('shop'); });
+      b.appendChild(nb);
+      return;
+    }
+    if (!cart.length) { b.appendChild(el('p', { class: 'muted', text: 'Nothing to check out yet.' })); return; }
+    var sub = cartTotal(), qtyN = cart.reduce(function (a, l) { return a + l.qty; }, 0);
+    var dl = el('dl', { class: 'sum num' });
+    [['Items (' + qtyN + ')', money(sub, cur)], ['Shipping', 'Quoted at fulfilment'], ['Order total', money(sub, cur)]].forEach(function (r, i) {
+      var row = el('div', {}, [el('dt', { text: r[0] }), el('dd', { text: r[1], style: i === 2 ? 'font-size:18px' : '' })]); dl.appendChild(row);
+    });
+    b.appendChild(dl);
+    var f = el('form', { id: 'coForm', novalidate: '' });
+    f.innerHTML = '<div class="field"><label for="cName">Name</label><input class="inp" id="cName" autocomplete="name" value="Test Customer"></div>' +
+      '<div class="field"><label for="cMail">Email</label><input class="inp" id="cMail" type="email" autocomplete="email" value="test@example.com"></div>' +
+      '<button class="btn primary big" style="width:100%" type="submit">Place test order · ' + money(sub, cur) + '</button>';
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name = $('#cName').value.trim(), mail = $('#cMail').value.trim();
+      if (!name || !/^\S+@\S+\.\S+$/.test(mail)) { toast('Enter a name and a valid email.'); return; }
+      order = {
+        number: 'T-' + Date.now().toString().slice(-6),
+        customer: { name: name, email: mail },
+        items: cart.map(function (l) { return buildPayload(l); }),
+        order_total: sub / 100, currency: 'USD', status: 'TEST – not charged'
+      };
+      cart = []; saveCart(); renderCart();
+    });
+    b.appendChild(f);
+  }
+
+  function renderPayload() {
+    var box = $('#payloadFields'); box.textContent = '';
+    var line = cart.length ? cart[cart.length - 1] : makeLine();
+    var card = $('#payloadCard');
+    if (!line) { card.hidden = true; return; }
+    card.hidden = false;
+    var p = buildPayload(line), f = flat(p);
+    var t = el('table', { class: 'kv mono' });
+    Object.keys(f).forEach(function (k) { t.appendChild(el('tr', {}, [el('th', { text: k }), el('td', { text: String(f[k]) })])); });
+    box.appendChild(t);
+    $('#payloadJson').textContent = JSON.stringify(p, null, 2);
+  }
+
+  /* ---------- views ---------- */
+  function show(v) {
+    if (v === 'admin' && !cfg.ui.admin) v = 'shop';
+    $$('[data-panel]').forEach(function (p) { p.hidden = p.getAttribute('data-panel') !== v; });
+    $$('.tab').forEach(function (t) { if (t.getAttribute('data-view') === v) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current'); });
+    if (v === 'cart') renderCart();
+    if (v === 'shop') renderCalc();
+    if (v === 'admin') renderAdmin();
+    if (location.hash.slice(1) !== v) { try { history.replaceState(null, '', '#' + v); } catch (e) {} }
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- 4 x 6 acceptance test ---------- */
+  function runTest() {
+    order = null;
+    var checks = [], first = cfg.materials[0];
+    st.w = '4'; st.h = '6'; st.qty = 1; st.mat = first.id;
+    syncInputs(); renderSelect(); renderCalc();
+    var d = dims(), m = curMat();
+    var exp = Math.round(24 * m.rate * 100) + Math.round(cfg.baseFee * 100);   // independent re-computation
+    checks.push([d.ok && d.w === 4 && d.h === 6, 'Inputs read as 4 ft × 6 ft']);
+    var q = quote(d.w, d.h, m, cfg.baseFee);
+    checks.push([q.sqft === 24, 'Total area = 24.00 sq ft']);
+    checks.push([q.unitCents === exp, '24.00 × ' + rateFmt(m.rate, cfg.currency) + ' + ' + money(Math.round(cfg.baseFee * 100), cfg.currency) + ' = ' + money(exp, cfg.currency) + ' (independent recalculation matches)']);
+    checks.push([$('#total').textContent === money(exp, cfg.currency), 'Price shown on the page: ' + $('#total').textContent]);
+    // switch through every material, read the DOM, compare
+    var okAll = true;
+    cfg.materials.forEach(function (mm) {
+      st.mat = mm.id; $('#mat').value = mm.id; renderCalc();
+      var want = money(Math.round(24 * mm.rate * 100) + Math.round(cfg.baseFee * 100), cfg.currency);
+      if ($('#total').textContent !== want) okAll = false;
+    });
+    checks.push([okAll, 'Switching material refreshes the total (' + cfg.materials.length + ' of ' + cfg.materials.length + ' materials checked)']);
+    st.mat = first.id; $('#mat').value = first.id; renderCalc();
+    var line = addToCart({ forceDemo: true });
+    var p = line && buildPayload(line);
+    checks.push([!!p && p.width_ft === 4 && p.height_ft === 6 && p.area_sqft === 24, 'Checkout line carries width 4 ft, height 6 ft, area 24 sq ft']);
+    checks.push([!!p && p.material === first.name && p.rate_per_sqft === first.rate, 'Checkout line carries material "' + first.name + '" at ' + rateFmt(first.rate, cfg.currency)]);
+    checks.push([!!p && Math.round(p.unit_price * 100) === exp, 'Checkout line carries price ' + money(exp, cfg.currency)]);
+    lastTest = checks;
+    show('cart');
+    renderTestResult();
+  }
+  function renderTestResult() {
+    var box = $('#testResult'); box.textContent = '';
+    if (!lastTest) return;
+    var pass = lastTest.every(function (c) { return c[0]; });
+    var wrap = el('div', { class: 'selftest' + (pass ? '' : ' fail') });
+    wrap.appendChild(el('h3', { text: pass ? '4 × 6 ft banner test: all ' + lastTest.length + ' checks passed' : '4 × 6 ft banner test: FAILED' }));
+    var ul = el('ul');
+    lastTest.forEach(function (c) { ul.appendChild(el('li', {}, [el('span', { class: c[0] ? 'ok' : 'no', text: c[0] ? '✓' : '✗' }), el('span', { text: c[1] })])); });
+    wrap.appendChild(ul);
+    wrap.appendChild(el('p', { class: 'sm', style: 'margin:10px 0 0', text: 'Next: review the cart, then press "Place test order" on the right.' }));
+    box.appendChild(wrap);
+  }
+
+  /* ---------- admin ---------- */
+  function renderAdmin() {
+    var tb = $('#matRows'); tb.textContent = '';
+    cfg.materials.forEach(function (m, i) {
+      var name = el('input', { class: 'inp', value: m.name, 'aria-label': 'Material name', maxlength: '80' });
+      var rate = el('input', { class: 'inp num', type: 'number', step: '0.01', min: '0', value: String(m.rate), inputmode: 'decimal', 'aria-label': 'Rate per square foot' });
+      var kind = el('select', { class: 'inp', 'aria-label': 'Preview shape', style: 'min-height:44px;width:auto' }, [
+        el('option', { value: 'banner', text: 'Banner' }), el('option', { value: 'sticker', text: 'Sticker' })]);
+      kind.value = m.kind;
+      name.addEventListener('input', function () {
+        var v = name.value.trim(); name.setAttribute('aria-invalid', String(!v));
+        if (v) { m.name = v; afterEdit(); }
+      });
+      rate.addEventListener('input', function () {
+        var v = parseFloat(rate.value), bad = !isFinite(v) || v < 0; rate.setAttribute('aria-invalid', String(bad));
+        if (!bad) { m.rate = Math.round(v * 10000) / 10000; afterEdit(); }
+      });
+      kind.addEventListener('change', function () { m.kind = kind.value; afterEdit(); });
+      var del = el('button', { class: 'btn small danger', type: 'button', text: 'Delete', 'aria-label': 'Delete ' + m.name });
+      del.addEventListener('click', function () {
+        if (cfg.materials.length < 2) { $('#admErr').textContent = 'Keep at least one material.'; return; }
+        cfg.materials.splice(i, 1); afterEdit(); renderAdmin();
+      });
+      var rw = el('div', { class: 'rate' }, [el('b', { text: cfg.currency }), rate]);
+      tb.appendChild(el('tr', {}, [el('td', {}, [name]), el('td', {}, [rw]), el('td', {}, [kind, document.createTextNode(' '), del])]));
+    });
+    $('#feeInp').value = String(cfg.baseFee);
+    $('#coMode').value = cfg.checkout.mode;
+    $('#coAction').value = cfg.checkout.action;
+    $('#coRedirect').value = cfg.checkout.redirect;
+    syncCoVis();
+    $('#jsonBox').value = exportJson();
+    $('#admErr').textContent = '';
+  }
+  function afterEdit() {
+    saveCfg(); renderSelect(); renderCalc(); $('#jsonBox').value = exportJson(); $('#admErr').textContent = '';
+  }
+  function exportJson() {
+    return JSON.stringify({
+      currency: cfg.currency, baseFee: cfg.baseFee, limits: cfg.limits,
+      materials: cfg.materials, checkout: cfg.checkout, ui: cfg.ui, configUrl: cfg.configUrl
+    }, null, 2);
+  }
+  function syncCoVis() {
+    var m = $('#coMode').value;
+    $('#coActionWrap').hidden = m === 'demo';
+    $('#coRedirectWrap').hidden = m !== 'ajax';
+  }
+  function applyConfig(json) {
+    cfg = normalize(json); cfg.ui.admin = DEFAULTS.ui.admin;
+    saveCfg(); renderSelect(); renderCalc(); renderAdmin();
+  }
+
+  /* ---------- inputs ---------- */
+  function syncInputs() { $('#w').value = st.w; $('#h').value = st.h; $('#qty').value = st.qty; }
+  function bind() {
+    $('#w').addEventListener('input', function (e) { st.w = e.target.value; renderCalc(); });
+    $('#h').addEventListener('input', function (e) { st.h = e.target.value; renderCalc(); });
+    $('#mat').addEventListener('change', function (e) { st.mat = e.target.value; renderCalc(); });
+    function setQty(v) { st.qty = Math.max(1, Math.min(999, parseInt(v, 10) || 1)); $('#qty').value = st.qty; renderCalc(); }
+    $('#qty').addEventListener('input', function (e) { if (e.target.value !== '') setQty(e.target.value); });
+    $('#qty').addEventListener('blur', function () { setQty($('#qty').value); });
+    $('#qMinus').addEventListener('click', function () { setQty(st.qty - 1); });
+    $('#qPlus').addEventListener('click', function () { setQty(st.qty + 1); });
+    $$('[data-size]').forEach(function (b) {
+      b.addEventListener('click', function () { var p = b.getAttribute('data-size').split('x'); st.w = p[0]; st.h = p[1]; syncInputs(); renderCalc(); });
+    });
+    $('#addBtn').addEventListener('click', function () {
+      lastTest = null;
+      var l = addToCart(); if (!l) return;
+      if (cfg.checkout.mode === 'demo' || !cfg.checkout.action) show('cart');
+    });
+    $$('[data-run-test]').forEach(function (b) { b.addEventListener('click', runTest); });
+    $$('.tab').forEach(function (t) { t.addEventListener('click', function () { show(t.getAttribute('data-view')); }); });
+    $('#backToShop').addEventListener('click', function () { show('shop'); });
+    window.addEventListener('resize', function () { if (!$('#view-shop').hidden) renderCalc(); });
+    window.addEventListener('hashchange', function () { var v = location.hash.slice(1); if (['shop', 'cart', 'admin'].indexOf(v) >= 0) show(v); });
+
+    // admin
+    $('#addMat').addEventListener('click', function () {
+      var n = cfg.materials.length + 1, id = 'material-' + Date.now().toString(36);
+      cfg.materials.push({ id: id, name: 'New material ' + n, rate: 5, kind: 'banner' });
+      afterEdit(); renderAdmin();
+      var rows = $$('#matRows tr'); var inp = $('input', rows[rows.length - 1]); inp.focus(); inp.select();
+    });
+    $('#feeInp').addEventListener('input', function (e) {
+      var v = parseFloat(e.target.value), bad = !isFinite(v) || v < 0; e.target.setAttribute('aria-invalid', String(bad));
+      if (!bad) { cfg.baseFee = Math.round(v * 100) / 100; afterEdit(); }
+    });
+    $('#coMode').addEventListener('change', function (e) { cfg.checkout.mode = e.target.value; syncCoVis(); afterEdit(); });
+    $('#coAction').addEventListener('input', function (e) { cfg.checkout.action = e.target.value.trim(); afterEdit(); });
+    $('#coRedirect').addEventListener('input', function (e) { cfg.checkout.redirect = e.target.value.trim(); afterEdit(); });
+    $('#expDl').addEventListener('click', function () {
+      var a = el('a', { href: URL.createObjectURL(new Blob([exportJson()], { type: 'application/json' })), download: 'sqft-rates.json' });
+      document.body.appendChild(a); a.click(); a.remove(); toast('Downloaded sqft-rates.json');
+    });
+    $('#expCopy').addEventListener('click', function () {
+      var t = exportJson();
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { toast('JSON copied.'); }, function () { $('#jsonBox').select(); toast('Select and copy from the box.'); });
+      else { $('#jsonBox').select(); toast('Select and copy from the box.'); }
+    });
+    $('#impFile').addEventListener('change', function (e) {
+      var f = e.target.files[0]; if (!f) return;
+      var r = new FileReader();
+      r.onload = function () { tryApply(String(r.result)); e.target.value = ''; };
+      r.readAsText(f);
+    });
+    $('#applyJson').addEventListener('click', function () { tryApply($('#jsonBox').value); });
+    $('#resetCfg').addEventListener('click', function () {
+      if (!confirm('Reset all materials, rates and the setup fee to the defaults in the page?')) return;
+      lsDel(LS_CFG); cfg = JSON.parse(JSON.stringify(DEFAULTS)); renderSelect(); renderCalc(); renderAdmin(); toast('Reset to defaults.');
+    });
+  }
+  function tryApply(text) {
+    var msg = $('#jsonMsg');
+    try { applyConfig(JSON.parse(text)); msg.style.color = 'var(--accent)'; $('#jsonMsg').textContent = 'Applied and saved.'; }
+    catch (e) { msg.style.color = 'var(--bad)'; msg.textContent = 'Not applied: ' + e.message; }
+  }
+
+  /* ---------- optional remote rates file ---------- */
+  function loadRemote() {
+    if (!DEFAULTS.configUrl || lsGet(LS_CFG)) return;
+    fetch(DEFAULTS.configUrl, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); })
+      .then(function (j) { cfg = normalize(j); cfg.ui.admin = DEFAULTS.ui.admin; renderSelect(); renderCalc(); })
+      .catch(function () { /* keep inline defaults */ });
+  }
+
+  /* ---------- public hook for host pages ---------- */
+  window.SqftPricing = {
+    getConfig: function () { return JSON.parse(exportJson()); },
+    setConfig: function (j) { applyConfig(j); },
+    quote: function (w, h, materialId) {
+      var m = cfg.materials.filter(function (x) { return x.id === materialId; })[0] || cfg.materials[0];
+      var q = quote(w, h, m, cfg.baseFee);
+      return { area_sqft: q.sqft, rate_per_sqft: m.rate, setup_fee: q.feeCents / 100, unit_price: q.unitCents / 100, material: m.name };
+    }
+  };
+
+  /* ---------- init ---------- */
+  if (!cfg.ui.admin) $('#adminTab').hidden = true;
+  renderSelect(); syncInputs(); renderBadge(); bind(); loadRemote();
+  var start = location.hash.slice(1);
+  show(['shop', 'cart', 'admin'].indexOf(start) >= 0 ? start : 'shop');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "productId": "custom-print",
+  "currencySymbol": "$",
+  "baseSetupFee": 10,
+  "setupFeeEnabled": true,
+  "minimumSqFt": 1,
+  "materials": [
+    { "id": "matte-13", "name": "13oz Matte Scrim Vinyl Banner", "rate": 3.5, "texture": "Matte scrim", "type": "banner" },
+    { "id": "blockout-18", "name": "18oz Heavy-Duty Blockout Banner", "rate": 4.75, "texture": "Blockout", "type": "banner" },
+    { "id": "gloss-3m", "name": "3M Gloss Calendared Vinyl Sticker", "rate": 5.25, "texture": "Gloss vinyl", "type": "sticker" },
+    { "id": "window-mesh", "name": "Perforated Window Mesh", "rate": 6, "texture": "Perforated mesh", "type": "banner" },
+    { "id": "clear-cast", "name": "Die-Cut Clear Cast Vinyl Decal", "rate": 6.8, "texture": "Clear cast", "type": "sticker" }
+  ]
+}
